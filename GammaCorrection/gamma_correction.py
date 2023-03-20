@@ -1,16 +1,11 @@
 """
-This is a python script for learning gamma correction in python. It will use the histogram function from the histogram
-folder.
+This is a python script for learning gamma correction in python.
 """
 
 import cv2
 import numpy as np
 
-# Read the image
-testImg = cv2.imread('../Res/tiger.jpg', 0)
 
-
-# Create a gamma correction function
 def gamma_correction(img, gamma):
     """
     This function will apply gamma correction to the input image.
@@ -26,13 +21,18 @@ def gamma_correction(img, gamma):
         lookup_table[i] = 255 * pow(i / 255, 1 / gamma)
 
     # Apply the gamma correction
-    img_gamma = cv2.LUT(img, lookup_table)
+    img_gamma = np.zeros_like(img)
+    for i in range(3):
+        img_gamma[:, :, i] = cv2.LUT(img[:, :, i], lookup_table)
 
     return img_gamma
 
 
+# Read the image
+testImg = cv2.imread('../Res/tiger.jpg')
+
 # Apply gamma correction
-gamma_corrected = gamma_correction(testImg, 0.75)
+gamma_corrected = gamma_correction(testImg, 0.5)
 
 # Show the images
 cv2.imshow('Original', testImg)
