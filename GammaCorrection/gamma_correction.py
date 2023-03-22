@@ -8,12 +8,12 @@ import numpy as np
 
 def gamma_correction(img, gamma):
     """
-    This function will apply gamma correction to the input image.
+    Function for applying gamma correction to an image.
     :param img: The input image.
     :param gamma: The gamma value.
     :return: The gamma corrected image.
     """
-    # Create a lookup table
+
     lookup_table = np.zeros((256, 1), dtype=np.uint8)
 
     # Fill the lookup table
@@ -29,13 +29,13 @@ def gamma_correction(img, gamma):
 
 
 # Read the image
-testImg = cv2.imread('../Res/tiger.jpg')
+test_Img = cv2.imread('../Res/tiger.jpg')
 
 # Apply gamma correction
-gamma_corrected = gamma_correction(testImg, 0.5)
+gamma_corrected = gamma_correction(test_Img, 0.5)
 
 # Show the images
-cv2.imshow('Original', testImg)
+cv2.imshow('Original', test_Img)
 cv2.imshow('Gamma corrected', gamma_corrected)
 
 # Wait for a key press
