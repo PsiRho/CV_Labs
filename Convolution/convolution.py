@@ -2,17 +2,31 @@ import cv2
 import numpy as np
 
 
-def convolve(img, kernel):
+def gaussian_kernel(size: int, sigma: float, channels: int) -> np.ndarray:
     """
-    This function will convolve the input image with the input kernel.
+    Create a Gaussian kernel with the given size and sigma.
+    :param size: The size of the kernel.
+    :param sigma: The standard deviation of the Gaussian distribution.
+    :param channels: The number of channels in the image. Default is 1.
+    :return: The Gaussian kernel.
+    """
+    kernel = np.zeros((size, size, channels), dtype=np.float32)
+    center = size // 2
+    x, y = np.mgrid[-center:center + 1, -center:center + 1]
+    kernel = np.exp(-(x ** 2 + y ** 2) / (2 * sigma ** 2))
+    kernel /= np.sum(kernel)
+    if channels > 1:
+        kernel = np.stack([kernel] * channels, axis=-1)
+    return kernel
+
+
+def convolute2(img, kernel):
+    """
+    This function will convolute the input image with the input kernel.
     :param img: The input image.
     :param kernel: The input kernel.
     :return: The convoluted image.
     """
-    # image dimensions
-    img_height = img.shape[0]
-    img_width = img.shape[1]
-
     # kernel dimensions
     kernel_height = kernel.shape[0]
     kernel_width = kernel.shape[1]
@@ -21,48 +35,35 @@ def convolve(img, kernel):
     pad_height = int((kernel_height - 1) / 2)
     pad_width = int((kernel_width - 1) / 2)
 
-    # Create the padded image
-    padded_img = np.zeros((img_height + (2 * pad_height), img_width + (2 * pad_width)), dtype=np.uint8)
-    padded_img[pad_height:padded_img.shape[0] - pad_height, pad_width:padded_img.shape[1] - pad_width] = img
+    # create padded image
+    padded_img = np.pad(img, ((pad_height, pad_height), (pad_width, pad_width), (0, 0)), mode='constant')
 
-    # Create the convoluted image
-    convoluted_img = np.zeros((img_height, img_width), dtype=np.uint8)
+    # create convoluted image
+    convoluted_img = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.uint8)
 
-    # Convolute the image
-    for i in range(img_height):
-        for j in range(img_width):
-            convoluted_img[i, j] = np.sum(padded_img[i:i + kernel_height, j:j + kernel_width] * kernel)
+    # perform convolution
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            for k in range(img.shape[2]):
+                convoluted_img[i, j, k] = np.sum(
+                    padded_img[i:i + kernel_height, j:j + kernel_width, k] * kernel[:, :, k])
 
     return convoluted_img
 
 
-# Read the image
-test_img = cv2.imread('Res/flower.jpg', 0)
-cv2.imshow('Original', test_img)
+# read image
+orig_img = cv2.imread('../Res/flower.jpg', cv2.IMREAD_COLOR)
 
-# Create the kernel
-gaussian_kernel_3x3 = np.array([[1, 2, 1], [2, 4, 2], [1, 2, 1]], dtype=np.float32) / 1 / 16
-gaussian_kernel_5x5 = np.array([[1, 4, 6, 4, 1], [4, 16, 24, 16, 4], [6, 24, 36, 24, 6], [4, 16, 24, 16, 4],
-                                [1, 4, 6, 4, 1]], dtype=np.float32) / 1 / 256
+# create gaussian kernel
+gaus_kernel = gaussian_kernel(9, 3, 3)
 
+# convolute image
+gaussian = convolute2(orig_img, gaus_kernel)
 
-def thresholding(img, threshold):
-    for i in range(img.shape[0]):
-        for j in range(img.shape[1]):
-            if img[i, j] <= threshold:
-                img[i][j] = 0
-    return img
+# show images
+cv2.imshow('Original', orig_img)
+cv2.imshow('Convoluted', gaussian)
 
-
-#thresholded = thresholding(test_img, 82)
-blurred5x5 = convolve(test_img, gaussian_kernel_5x5)
-blurred3x3 = convolve(test_img, gaussian_kernel_3x3)
-
-
-# Show the images
-cv2.imshow('Convoluted3x3', blurred3x3)
-cv2.imshow('Convoluted5x5', blurred5x5)
-
-# press any key to close all windows made by cv2
+# wait for key press
 cv2.waitKey(0)
 cv2.destroyAllWindows()
