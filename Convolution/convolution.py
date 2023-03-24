@@ -10,7 +10,7 @@ def gaussian_kernel(size: int, sigma: float, channels: int) -> np.ndarray:
     :param channels: The number of channels in the image. Default is 1.
     :return: The Gaussian kernel.
     """
-    kernel = np.zeros((size, size, channels), dtype=np.float32)
+
     center = size // 2
     x, y = np.mgrid[-center:center + 1, -center:center + 1]
     kernel = np.exp(-(x ** 2 + y ** 2) / (2 * sigma ** 2))
@@ -20,49 +20,55 @@ def gaussian_kernel(size: int, sigma: float, channels: int) -> np.ndarray:
     return kernel
 
 
-def convolute2(img, kernel):
-    """
-    This function will convolute the input image with the input kernel.
-    :param img: The input image.
-    :param kernel: The input kernel.
-    :return: The convoluted image.
-    """
-    # kernel dimensions
-    kernel_height = kernel.shape[0]
-    kernel_width = kernel.shape[1]
+def convolute(image, kernel, num_channels):
+    # get image dimensions
+    i_row, i_col = image.shape[:2]
+    i_chan = num_channels
 
-    # padding
-    pad_height = int((kernel_height - 1) / 2)
-    pad_width = int((kernel_width - 1) / 2)
+    # get kernel dimensions
+    k_row, k_col = kernel.shape[:2]
+    k_chan = num_channels
 
-    # create padded image
-    padded_img = np.pad(img, ((pad_height, pad_height), (pad_width, pad_width), (0, 0)), mode='constant')
+    # create output image
+    output = np.zeros_like(image)
 
-    # create convoluted image
-    convoluted_img = np.zeros((img.shape[0], img.shape[1], img.shape[2]), dtype=np.uint8)
+    # add zero padding
+    pad_width = k_row // 2
+    if num_channels == 1:
+        padding = ((pad_width, pad_width), (pad_width, pad_width))
+    else:
+        padding = ((pad_width, pad_width), (pad_width, pad_width), (0, 0))
+    padded_image = np.pad(image, padding, 'constant', constant_values=0)
 
-    # perform convolution
-    for i in range(img.shape[0]):
-        for j in range(img.shape[1]):
-            for k in range(img.shape[2]):
-                convoluted_img[i, j, k] = np.sum(
-                    padded_img[i:i + kernel_height, j:j + kernel_width, k] * kernel[:, :, k])
+    # convolute
+    for y in range(i_row):
+        for x in range(i_col):
+            if i_chan == 1:
+                output[y, x] = (kernel * padded_image[y: y + k_row, x: x + k_col]).sum()
+            else:
+                for c in range(i_chan):
+                    output[y, x, c] = (kernel[:, :, c] * padded_image[y: y + k_row, x: x + k_col, c]).sum()
 
-    return convoluted_img
+    return output
 
 
 # read image
-orig_img = cv2.imread('../Res/flower.jpg', cv2.IMREAD_COLOR)
+orig_img_flower = cv2.imread('Res/flower.jpg', cv2.IMREAD_COLOR)
+orig_img_tiger = cv2.imread('Res/tiger.jpg', cv2.IMREAD_GRAYSCALE)
 
 # create gaussian kernel
-gaus_kernel = gaussian_kernel(9, 3, 3)
+gaus_kernel = gaussian_kernel(3, 1, 3)
+gaus_kernel_tiger = gaussian_kernel(3, 1, 1)
 
 # convolute image
-gaussian = convolute2(orig_img, gaus_kernel)
+gaussian = convolute(orig_img_flower, gaus_kernel, 3)
+gaussian_tiger = convolute(orig_img_tiger, gaus_kernel_tiger, 1)
 
 # show images
-cv2.imshow('Original', orig_img)
-cv2.imshow('Convoluted', gaussian)
+cv2.imshow('Original_flower', orig_img_flower)
+cv2.imshow('Convoluted_flower', gaussian)
+cv2.imshow('Original_tiger', orig_img_tiger)
+cv2.imshow('Convoluted_tiger', gaussian_tiger)
 
 # wait for key press
 cv2.waitKey(0)
