@@ -20,14 +20,13 @@ def gaussian_kernel(size: int, sigma: float, channels: int) -> np.ndarray:
     return kernel
 
 
-def convolute(image, kernel, num_channels):
+def convolute(image, kernel, num_channels: int):
     # get image dimensions
     i_row, i_col = image.shape[:2]
     i_chan = num_channels
 
     # get kernel dimensions
     k_row, k_col = kernel.shape[:2]
-    k_chan = num_channels
 
     # create output image
     output = np.zeros_like(image)
@@ -53,22 +52,22 @@ def convolute(image, kernel, num_channels):
 
 
 # read image
-orig_img_flower = cv2.imread('Res/flower.jpg', cv2.IMREAD_COLOR)
-orig_img_tiger = cv2.imread('Res/tiger.jpg', cv2.IMREAD_GRAYSCALE)
+orig_img_color = cv2.imread('Res/flower.jpg', cv2.IMREAD_COLOR)
+orig_img_grayscale = cv2.imread('Res/tiger.jpg', cv2.IMREAD_GRAYSCALE)
 
 # create gaussian kernel
-gaus_kernel = gaussian_kernel(3, 1, 3)
-gaus_kernel_tiger = gaussian_kernel(3, 1, 1)
+gaussian_kernel_color = gaussian_kernel(3, 1, 3)
+gaussian_kernel_grayscale = gaussian_kernel(3, 1, 1)
 
 # convolute image
-gaussian = convolute(orig_img_flower, gaus_kernel, 3)
-gaussian_tiger = convolute(orig_img_tiger, gaus_kernel_tiger, 1)
+conv_img_color = convolute(orig_img_color, gaussian_kernel_color, 3)
+conv_img_grayscale = convolute(orig_img_grayscale, gaussian_kernel_grayscale, 1)
 
 # show images
-cv2.imshow('Original_flower', orig_img_flower)
-cv2.imshow('Convoluted_flower', gaussian)
-cv2.imshow('Original_tiger', orig_img_tiger)
-cv2.imshow('Convoluted_tiger', gaussian_tiger)
+cv2.imshow('Original_flower', orig_img_color)
+cv2.imshow('Convoluted_flower', conv_img_color)
+cv2.imshow('Original_tiger', orig_img_grayscale)
+cv2.imshow('Convoluted_tiger', conv_img_grayscale)
 
 # wait for key press
 cv2.waitKey(0)
