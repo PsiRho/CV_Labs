@@ -66,3 +66,18 @@ def remove_isolated_pixels(image: np.ndarray, region_size: int) -> np.ndarray:
 
     return output
 
+
+def colorize_edges(orig_img_color, segmented_img_grayscale):
+    # get image dimensions
+    i_row, i_col = orig_img_color.shape[:2]
+
+    # create output image
+    output = np.zeros_like(orig_img_color)
+
+    # apply color to segmented image
+    for y in range(i_row):
+        for x in range(i_col):
+            if segmented_img_grayscale[y, x] == 255:
+                output[y, x] = orig_img_color[y, x]
+
+    return output
