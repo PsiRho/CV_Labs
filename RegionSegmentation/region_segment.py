@@ -49,25 +49,31 @@ def remove_isolated_pixels(image: np.ndarray, region_size: int) -> np.ndarray:
     :return: the image with isolated pixels removed
     """
     # image dimensions
-    i_row, i_col = image.shape[:2]
+    row, col = image.shape[:2]
 
     # empty image for output
     output = np.zeros_like(image)
 
     # remove isolated pixels
-    for y in range(i_row):
-        for x in range(i_col):
+    for y in range(row):
+        for x in range(col):
             if image[y, x] == 255:
-                # if pixel is not on the border
-                if 0 < y < i_row - 1 and 0 < x < i_col - 1:
-                    # if there are at least region_size white pixels in the 3x3 neighborhood
-                    if (image[y - 1:y + 2, x - 1:x + 2] == 255).sum() >= region_size:
-                        output[y, x] = 255
+                # if pixel is not on the border or has at least region_size white pixels in its 3x3 neighborhood
+                if (y == 0 or y == row - 1 or x == 0 or x == col - 1) or (
+                        image[y - 1:y + 2, x - 1:x + 2] == 255).sum() >= region_size:
+                    output[y, x] = 255
 
     return output
 
 
 def colorize_edges(orig_img_color, segmented_img_grayscale):
+    """
+    Colorize the edges of the segmented image. Will take the colors from the original image and apply them to the
+    segmented image where there are edges (white pixels).
+    :param orig_img_color: the original image
+    :param segmented_img_grayscale: the segmented image
+    :return: the colorized image
+    """
     # get image dimensions
     i_row, i_col = orig_img_color.shape[:2]
 
@@ -84,6 +90,7 @@ def colorize_edges(orig_img_color, segmented_img_grayscale):
 
 
 # Wrapper for reading the image, performing region based segmentation and displaying the results.
+# TODO: remove wrapper function
 def im_segment(image_path: str, kernel_size: int = 3, threshold: int = 0, region_size: int = 5,
                clean_image: bool = False):
     # read image
