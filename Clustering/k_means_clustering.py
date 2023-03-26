@@ -55,3 +55,30 @@ def create_image_from_labels(labels, cluster_centers) -> np.ndarray:
     return cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
 
+# wrapper for timing functions with args
+def timeit_wrapper(func, *args, **kwargs):
+    def wrapped():
+        return func(*args, **kwargs)
+
+    return wrapped
+
+
+def main():
+    # read image
+    orig_img = cv2.imread('../Res/flower.jpg', cv2.IMREAD_COLOR)
+
+    # perform k-means clustering on the image
+    labels, cluster_centers = k_means_clustering(orig_img, k=10, tolerance=1e-4)
+    #
+    # create image from labels and cluster centers
+    clustered_img = create_image_from_labels(labels, cluster_centers)
+
+    # show images
+    cv2.imshow('Original Image', orig_img)
+    cv2.imshow('Clustered Image', clustered_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+if __name__ == '__main__':
+    main()
