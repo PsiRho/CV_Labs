@@ -24,3 +24,22 @@ def update_clusters(img, labels, k: int) -> np.ndarray:
     return new_cluster_centers
 
 
+def k_means_clustering(image, k: int, tolerance: float) -> (np.ndarray, np.ndarray):
+    # perform k-means clustering on the image
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)  # convert to HSV
+    height, width = hsv_image.shape[:2]
+    img = hsv_image.reshape((height * width, 3))
+    cluster_centers = initialize_clusters(img, k)
+    iterations = 0
+    while True:
+        labels = assign_labels(img, cluster_centers)
+        new_cluster_centers = update_clusters(img, labels, k)
+        iterations += 1
+        if np.allclose(cluster_centers, new_cluster_centers, rtol=tolerance):  # check for convergence
+            break
+        cluster_centers = new_cluster_centers
+    print(f'k-means clustering converged after {iterations} iterations.')
+    labels_2d = labels.reshape((height, width))
+    return labels_2d, cluster_centers
+
+
