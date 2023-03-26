@@ -43,3 +43,15 @@ def k_means_clustering(image, k: int, tolerance: float) -> (np.ndarray, np.ndarr
     return labels_2d, cluster_centers
 
 
+def create_image_from_labels(labels, cluster_centers) -> np.ndarray:
+    # puts together an image from the labels and cluster centers
+    height, width = labels.shape[:2]
+    image = np.zeros((height, width, 3))
+    for i in range(height):
+        for j in range(width):
+            image[i, j] = cluster_centers[labels[i, j]]
+
+    image = image.astype(np.uint8)  # convert to uint8
+    return cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+
