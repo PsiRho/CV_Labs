@@ -12,3 +12,15 @@ def assign_labels(img, cluster_centers) -> np.ndarray:  # labels
     distances = np.linalg.norm(img - cluster_centers[:, np.newaxis], axis=2)
     return np.argmin(distances, axis=0)
 
+
+def update_clusters(img, labels, k: int) -> np.ndarray:
+    # update centers based on the mean of the pixels assigned to each cluster
+    new_cluster_centers = np.zeros((k, 3))
+    for i in range(k):
+        if np.sum(labels == i) == 0:  # if cluster is empty
+            new_cluster_centers[i] = img[np.random.choice(img.shape[0], 1), :]  # choose random pixel as new center
+        else:
+            new_cluster_centers[i] = np.mean(img[labels == i], axis=0)  # update center
+    return new_cluster_centers
+
+
