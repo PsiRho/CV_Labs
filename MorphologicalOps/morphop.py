@@ -29,3 +29,19 @@ def morph_op(image, op_type: str, kernel_size: int = 3) -> np.ndarray:
                 output[y, x] = 255
 
     return output
+
+
+def opening(image, kernel_size: int = 3) -> np.ndarray:
+    """
+    Perform opening on the given image.
+    :param kernel_size: size of the kernel
+    :param image: an image
+    :return: the segmented image
+    """
+    # erode image
+    eroded_image = morph_op(image, 'erode', kernel_size)
+
+    # dilate image
+    opened_img = morph_op(eroded_image, 'dilate', kernel_size)
+
+    return opened_img
