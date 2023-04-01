@@ -17,7 +17,7 @@ def histogram(img):
     :return: The histogram of the image.
     """
     # Create a histogram
-    hist = np.zeros((256, 1), dtype=np.int32)
+    hist = np.zeros((256, 1), dtype=np.uint32)
 
     # Calculate the histogram
     for i in range(img.shape[0]):
