@@ -45,3 +45,19 @@ def opening(image, kernel_size: int = 3) -> np.ndarray:
     opened_img = morph_op(eroded_image, 'dilate', kernel_size)
 
     return opened_img
+
+
+def closing(image, kernel_size: int = 3) -> np.ndarray:
+    """
+    Perform closing on the given image.
+    :param kernel_size: size of the kernel
+    :param image: an image
+    :return: the segmented image
+    """
+    # dilate image
+    dilated_image = morph_op(image, 'dilate', kernel_size)
+
+    # erode image
+    closed_img = morph_op(dilated_image, 'erode', kernel_size)
+
+    return closed_img
