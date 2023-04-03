@@ -3,10 +3,10 @@ import timeit
 
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 import Convolution.convolution as conv
 import MorphologicalOps.morphop as mrph
 import Util.colorize as clr
-import Histogram.equalization as eq
 
 
 def laplacian_of_gaussian(image: np.ndarray, size: int = 3, sigma: float = -1, threshold: int = 150) -> np.ndarray:
@@ -50,12 +50,12 @@ def difference_of_gaussian(image: np.ndarray, kernel1: np.ndarray, kernel2: np.n
     :param kernel2: the second kernel to convolute with the image
     :return: the segmented image
     """
-    convoluted_image1 = conv.convolute(image, kernel1, 1)
-    convoluted_image2 = conv.convolute(image, kernel2, 1)
-    diff_of_gaussian = convoluted_image1 - convoluted_image2
+    convoluted_image1 = conv.convolute(image, kernel1, 1)  # Image with low SD
+    convoluted_image2 = conv.convolute(image, kernel2, 1)  # Image with high SD
+    diff_of_gaussian = convoluted_image2 - convoluted_image1
 
     # threshold
-    diff_of_gaussian = np.where(diff_of_gaussian <= threshold, 255, 0)
+    diff_of_gaussian = np.where(diff_of_gaussian >= threshold, 255, 0)
 
     return diff_of_gaussian
 
@@ -81,15 +81,18 @@ def action(*args, **kwargs):
     kernel_size = kwargs.get('kernel_size', 5)
 
     if str(args[1].casefold()) == 'DoG'.casefold():
-        sigma = kwargs.get('sigma', -1)
-        if sigma == -1:
-            sigma2 = 0.3 * ((kernel_size - 1) * 0.5 - 1) + 0.8
-        else:
-            sigma2 = sigma
 
         # create kernels
-        kernel1 = conv.gaussian_kernel(kernel_size, kwargs.get('sigma', -1), channels=1)
-        kernel2 = conv.gaussian_kernel(kernel_size, sigma2 * kwargs.get('dog_sigma_ratio', 1.6), channels=1)
+        if kwargs.get('sigma', -1) != -1:
+            kernel1 = conv.gaussian_kernel(kernel_size, kwargs.get('sigma', -1), channels=1)
+            kernel2 = conv.gaussian_kernel(kernel_size, kwargs.get('sigma', -1) * kwargs.get('dog_sigma_ratio', 1.6),
+                                           channels=1)
+        else:
+            kernel1 = conv.gaussian_kernel(kernel_size, -1, channels=1)
+            kernel2 = conv.gaussian_kernel(kernel_size,
+                                           (0.3 * ((kernel_size - 1) * 0.5 - 1) + 0.8) * kwargs.get('dog_sigma_ratio',
+                                                                                                    1.6),
+                                           channels=1)
 
         # perform segmentation
         image = difference_of_gaussian(orig_img_gray, kernel1, kernel2, kwargs.get('threshold', 150))
@@ -131,11 +134,51 @@ def action(*args, **kwargs):
     # display image
     cv2.imshow(img_name, image)
 
-    return image
+    return image, img_name
+
+
+def plot_images(images, titles, subtitle):
+    num_images = len(images)
+
+    # Create a figure object with enough subplots to hold all the images
+    fig, axes = plt.subplots(nrows=1, ncols=num_images, figsize=(num_images * 4, 4))
+
+    # Plot each image and set the title for each subplot
+    for i in range(num_images):
+        axes[i].imshow(images[i], cmap='gray')
+        axes[i].set_title(titles[i])
+        axes[i].set_xticks([])
+        axes[i].set_yticks([])
+
+    # Set the general subtitle for the entire figure
+    fig.suptitle(subtitle, fontsize=14, fontweight='bold', y=1.05)
+
+    # Adjust the spacing between the subplots and show the figure
+    plt.subplots_adjust(wspace=0.1, hspace=0.1)
+    plt.show()
+
+    fig.savefig('../Res/plotflowertiger.png')
 
 
 def main():
-    action('../Res/flower.jpg', 'DoG', kernel_size=9, dog_sigma_ratio=2, colorize=True, threshold=192, morph_op='opening')
+    # All avaliable args: image path, DoG (Difference of gaussian) or LoG (Laplacian of Gaussian)
+    # All available kwargs: kernel_size: int, sigma: float, DoG_sigma_ratio, threshold: int,
+    # morphological_operation_type ['erode', 'dilate', 'opening', 'closing'], colorize: bool.
+    # operation kernel size
+    image1, image1_name = action('../Res/flower.jpg', 'DoG', kernel_size=5, dog_sigma_ratio=1.6, threshold=150)
+    image2, image2_name = action('../Res/tiger.jpg', 'DoG', kernel_size=5, dog_sigma_ratio=1.6, threshold=150)
+    image3, image3_name = action('../Res/flower.jpg', 'LoG', kernel_size=5, threshold=150)
+    image4, image4_name = action('../Res/tiger.jpg', 'LoG', kernel_size=5, threshold=150)
+
+    imglist = [image1, image3, image2, image4]
+    titles = ['DoG k_size=5, sigma_r=1.6', 'LoG k_size=5', 'DoG k_size=5, sigma_r=1.6',
+              'LoG k_size=5']
+    subtitle = 'sigma = 0.3 * ((kernel_size - 1) * 0.5 - 1) + 0.8, kernel size = 9, threshold = 150'
+    plot_images(imglist, titles, subtitle)
+
+    # save images
+    #for i in range(1, 5):
+    #   cv2.imwrite('../Res/' + locals()['image' + str(i) + '_name'] + '.png', locals()['image' + str(i)])
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
