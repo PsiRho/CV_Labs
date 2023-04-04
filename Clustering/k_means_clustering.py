@@ -38,34 +38,20 @@ def assign_labels(img, cluster_centers) -> np.ndarray:
     return np.argmin(distances, axis=1)
 
 
-def update_clusters2(img, labels, k: int) -> np.ndarray:
-    # update centers based on the mean of the pixels assigned to each cluster
-    new_cluster_centers = np.zeros((k, 3))
-    for i in range(k):
-        if np.sum(labels == i) == 0:  # if cluster is empty
-            new_cluster_centers[i] = random_pixel(img, 1)  # new random center
-        else:
-            new_cluster_centers[i] = np.mean(img[labels == i], axis=0)  # update center
-    return new_cluster_centers
-
-
 def update_clusters(img, labels, k: int) -> np.ndarray:
     # update centers based on the mean of the pixels assigned to each cluster
     new_cluster_centers = np.zeros((k, 3))
     for i in range(k):
-        mask = labels == i
-        count = np.sum(mask)
-        if count == 0:  # if cluster is empty
+        if np.sum(labels == i) != 0:
+            new_cluster_centers[i] = np.mean(img[labels == i], axis=0)  # update center
+        else:  # if cluster is empty
             new_cluster_centers[i] = random_pixel(img, 1)  # new random center
-        else:
-            new_cluster_centers[i] = np.sum(img * mask[:, np.newaxis], axis=0) / count
     return new_cluster_centers
 
 
 def k_means_clustering(image, k: int, tolerance: float) -> (np.ndarray, np.ndarray):
     # perform k-means clustering on the image
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
     height, width = image.shape[:2]
     img = image.reshape((height * width, 3))
     cluster_centers = initialize_clusters(img, k)
@@ -85,11 +71,7 @@ def k_means_clustering(image, k: int, tolerance: float) -> (np.ndarray, np.ndarr
 def create_image_from_labels(labels, cluster_centers) -> np.ndarray:
     # puts together an image from the labels and cluster centers
     height, width = labels.shape[:2]
-    image = np.zeros((height, width, 3))
-    for i in range(height):
-        for j in range(width):
-            image[i, j] = cluster_centers[labels[i, j]]
-
+    image = cluster_centers[labels.flatten()].reshape((height, width, -1))
     image = image.astype(np.uint8)
     return cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
@@ -168,7 +150,7 @@ def main():
     #    clustered_img = create_image_from_labels(labels, cluster_centers)
     #    cv2.imshow(f'clustered image {i}', clustered_img)
 
-    # display_kmeans_clusters(orig_img, labels, cluster_centers)
+    display_kmeans_clusters(orig_img, labels, cluster_centers)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
