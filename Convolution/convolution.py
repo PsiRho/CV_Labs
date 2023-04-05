@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import ndarray
-from Util.padding import padding
+from Util.padding import pad
 
 
 def gaussian_kernel(size: int = 5, sigma: float = -1, channels: int = 1) -> ndarray:
@@ -33,7 +33,7 @@ def gaussian_kernel(size: int = 5, sigma: float = -1, channels: int = 1) -> ndar
     return kernel
 
 
-def convolute(image, kernel, channels: int):
+def convolute2(image, kernel, channels: int):
     # get image dimensions
     row, col = image.shape[:2]
     chan = channels
@@ -45,7 +45,7 @@ def convolute(image, kernel, channels: int):
     output = np.zeros_like(image)
 
     # add zero padding
-    padded_image = padding(image, kernel, channels)
+    padded_image = pad(image, kernel, channels)
 
     # convolute
     for y in range(row):
@@ -57,5 +57,35 @@ def convolute(image, kernel, channels: int):
                     output[y, x, c] = np.sum(kernel[:, :, c] * padded_image[y: y + k_row, x: x + k_col, c])
 
     return output
+
+
+def convolute(image, kernel):
+    # get image dimensions
+    row, col = image.shape[:2]
+    if len(image.shape) == 2:
+        chan = 1
+    else:
+        chan = image.shape[2]
+
+    # get kernel dimensions
+    k_row, k_col = kernel.shape[:2]
+
+    # create output image
+    output = np.zeros_like(image)
+
+    # add zero padding
+    padded_image = pad(image, kernel)
+
+    # convolute
+    for c in range(chan):
+        for y in range(row):
+            for x in range(col):
+                if chan == 1:
+                    output[y, x] = np.sum(kernel * padded_image[y: y + k_row, x: x + k_col])
+                else:
+                    output[y, x, c] = np.sum(kernel * padded_image[y: y + k_row, x: x + k_col, c])
+
+    return output
+
 
 
