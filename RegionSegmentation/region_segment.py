@@ -191,9 +191,6 @@ def action(*args, **kwargs):
         ('_' + morph_op + str(kwargs.get('morph_kernel_size', 3))
          if morph_op != '' else ''))
 
-    # display image
-    cv2.imshow(img_name, image)
-
     return image, img_name
 
 
@@ -217,7 +214,7 @@ def plot_images(images, titles, subtitle):
     plt.subplots_adjust(wspace=0.1, hspace=0.1)
     plt.show()
 
-    fig.savefig('../output_img/plotflowertiger.png')
+    #fig.savefig('../output_img/plotflowertiger.png')
 
 
 def main():
@@ -228,27 +225,30 @@ def main():
     orig_img = cv2.imread('../Res/flower.jpg', cv2.IMREAD_COLOR)
 
     # mean filter
-    median_filtered = median_filter(orig_img, kernel_size=7)
+    median_filtered = median_filter(orig_img, kernel_size=5)
     cv2.imshow('median_filtered', median_filtered)
 
-    image1, image1_name = action('../Res/flower.jpg', 'DoG', kernel_size=5, dog_sigma_ratio=1.6, threshold=150)
-    image2, image2_name = action(median_filtered, 'DoG', kernel_size=5, dog_sigma_ratio=1.6, threshold=150)
-    image3, image3_name = action('../Res/flower.jpg', 'LoG', kernel_size=5, threshold=150)
-    image4, image4_name = action(median_filtered, 'LoG', kernel_size=5, threshold=150)
+    #image1, image1_name = action('../Res/flower.jpg', 'DoG', kernel_size=5, dog_sigma_ratio=1.6, threshold=150)
+    #image2, image2_name = action(median_filtered, 'DoG', kernel_size=9, dog_sigma_ratio=1.3, threshold=150, colorize=True)
+    #image3, image3_name = action('../Res/flower.jpg', 'LoG', kernel_size=5, threshold=150)
+    image4, image4_name = action(median_filtered, 'LoG', kernel_size=9, threshold=150)
+
+    #cv2.imshow('dog', image2)
+    cv2.imshow('log', image4)
 #
-    imglist = [image1, image2, image3, image4]
-    titles = ['DoG k_size=5, sigma_r=1.6', 'DoG k_size=5, sigma_r=1.6, Median filtered', 'LoG k_size=5',
-              'LoG k_size=5, Median filtered']
-    subtitle = 'sigma = 0.3 * ((kernel_size - 1) * 0.5 - 1) + 0.8, kernel size = 9, threshold = 150'
-    plot_images(imglist, titles, subtitle)
+    #imglist = [image1, image2, image3, image4]
+    #titles = ['DoG k_size=5, sigma_r=1.6', 'DoG k_size=5, sigma_r=1.6, Median filtered', 'LoG k_size=5',
+    #          'LoG k_size=5, Median filtered']
+    #subtitle = 'sigma = 0.3 * ((kernel_size - 1) * 0.5 - 1) + 0.8, kernel size = 9, threshold = 150'
+    #plot_images(imglist, titles, subtitle)
 #
     # display images
-    for i in range(1, 5):
-        cv2.imshow(locals()['image' + str(i) + '_name'], locals()['image' + str(i)])
+    #for i in range(1, 5):
+    #    cv2.imshow(locals()['image' + str(i) + '_name'], locals()['image' + str(i)])
 
     #save images
-    for i in range(1, 5):
-      cv2.imwrite('../output_img/' + locals()['image' + str(i) + '_name'] + '.png', locals()['image' + str(i)])
+    #for i in range(1, 5):
+    #  cv2.imwrite('../output_img/' + locals()['image' + str(i) + '_name'] + '.png', locals()['image' + str(i)])
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

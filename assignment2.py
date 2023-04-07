@@ -133,8 +133,8 @@ def assign_labels(img, cluster_centers) -> np.ndarray:
     # return cluster index
     return np.argmin(distances, axis=1)
 
-
 def k_means_clustering(image, k: int, tolerance: float) -> (np.ndarray, np.ndarray):
+    # TODO: add a param for max iterations
     # convert to RGB
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -292,25 +292,6 @@ def showcase_dog(kernel_size: int = 5, sigma: float = -1, sigma_ratio: float = 1
     cv2.imshow(''.join(random.choices(string.ascii_uppercase + string.digits, k=7)), dog_img_tiger)
 
 
-def showcase_kmeans(k: int = 2, tolerance: float = 1e-4):
-    # read image
-    original_img_flower = cv2.imread(PATH_FLOWER, cv2.IMREAD_COLOR)
-    original_img_tiger = cv2.imread(PATH_TIGER, cv2.IMREAD_COLOR)
-
-    # k-means
-    labels_flower, cluster_centers_flower = k_means_clustering(original_img_flower, k, tolerance=tolerance)
-    labels_tiger, cluster_centers_tiger = k_means_clustering(original_img_tiger, k, tolerance=tolerance)
-
-    # create result image
-    result_img_flower = create_result_img(labels_flower, cluster_centers_flower)
-    result_img_tiger = create_result_img(labels_tiger, cluster_centers_tiger)
-
-    # show image
-    cv2.imshow(f'flower_k={k}_' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5)),
-               result_img_flower)
-    cv2.imshow(f'tiger_k={k}_' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5)), result_img_tiger)
-
-
 def showcase_median_filter_dog(gaussian_kernel_size: int = 5, median_blur_kernel_size: int = 7, sigma: float = -1,
                                sigma_ratio: float = 1.5, colorize: bool = False):
     # read images
@@ -345,6 +326,25 @@ def showcase_median_filter_dog(gaussian_kernel_size: int = 5, median_blur_kernel
     # show image
     cv2.imshow(''.join(random.choices(string.ascii_uppercase + string.digits, k=5)), dog_img_flower)
     cv2.imshow(''.join(random.choices(string.ascii_uppercase + string.digits, k=5)), dog_img_tiger)
+
+
+def showcase_kmeans(k: int = 2, tolerance: float = 1e-4):
+    # read image
+    original_img_flower = cv2.imread(PATH_FLOWER, cv2.IMREAD_COLOR)
+    original_img_tiger = cv2.imread(PATH_TIGER, cv2.IMREAD_COLOR)
+
+    # k-means
+    labels_flower, cluster_centers_flower = k_means_clustering(original_img_flower, k, tolerance=tolerance)
+    labels_tiger, cluster_centers_tiger = k_means_clustering(original_img_tiger, k, tolerance=tolerance)
+
+    # create result image
+    result_img_flower = create_result_img(labels_flower, cluster_centers_flower)
+    result_img_tiger = create_result_img(labels_tiger, cluster_centers_tiger)
+
+    # show image
+    cv2.imshow(f'flower_k={k}_' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5)),
+               result_img_flower)
+    cv2.imshow(f'tiger_k={k}_' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=5)), result_img_tiger)
 
 
 def showcase_median_filter_kmeans(median_blur_kernel_size: int = 7, k: int = 4, tolerance: float = 1e-4):
@@ -390,8 +390,8 @@ def main(*args):
     # showcase the k-means with different k values
     elif args[0] == 3:
         # loop over different k values
-        for i in range(2, 5):
-            showcase_kmeans(k=i, tolerance=1e-4)
+        for i in range(2, 6):
+            showcase_kmeans(k=2**i, tolerance=1e-4)
 
     # showcase the median filter and the k-means
     elif args[0] == 4:
@@ -403,7 +403,8 @@ def main(*args):
 
 if __name__ == '__main__':
 
-    # The code is not optimized for performance, so it can take a while to run (15-30 sec on my computer).
+    # The code is not optimized for performance, the greater the params or image size, the longer it takes to process.
+    # All the code runs and displays the images on my setup.
 
     # main(1) = showcase the difference of gaussian
     # main(2) = showcase the median filter and the difference of gaussian

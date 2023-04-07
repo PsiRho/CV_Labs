@@ -1,16 +1,33 @@
 # CV_Labs
 
-## Code that's been used in the IDATG2206 Computer Vision course at NTNU.
+### Collection of code that's been used for the IDATG2206 Computer Vision course at NTNU.
 
-### Disclaimer
+## Disclaimer
 
 This code should probably not be used for anything where you need it to work!
 
-It's single use, don't be surprised if something brakes after using it one time. If you as much as think about changing
+It's single use. Don't be surprised if something brakes after using it one time. If you as much as think about changing
 a single character it will probably break. There is no proper testing and there is no error handling. I take no
 responsibility for anything related to the code.
 
 Other than that, feel free to use the code.
+
+## Example images
+
+###### Images created with code from this repository
+
+Edge detection with laplacian of gaussian (LoG) filter
+<img src="output_img/LoG_ksz=9_color.jpg" width="500" alt="Flower">
+
+Same as above with inverted threshold colors
+<img src="output_img/LoG_ksz=9_color_inv.jpg" width="500" alt="Flower_inv">
+
+Same as above with different image
+<img src="output_img/Tiger_LoG_ksz=9_color_inv.jpg" width="500" alt="Tiger">
+
+
+
+
 
 ### Known issues
 
