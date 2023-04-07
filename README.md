@@ -1,7 +1,10 @@
 # CV_Labs
 
-### Collection of code that's been used for the IDATG2206 Computer Vision course at NTNU.
+---
 
+###### Collection of code that's been used for the IDATG2206 Computer Vision course at NTNU.
+
+---
 ## Disclaimer
 
 This code should probably not be used for anything where you need it to work!
@@ -12,24 +15,30 @@ responsibility for anything related to the code.
 
 Other than that, feel free to use the code.
 
+***
 ## Example images
 
-###### Images created with code from this repository
+<figure>
+    <img src="output_img/LoG_ksz=9_color.jpg" width="500"
+         alt="Flower">
+    <figcaption>Edge detection with laplacian of gaussian (LoG) filter.</figcaption>
+</figure>
 
-Edge detection with laplacian of gaussian (LoG) filter
-<img src="output_img/LoG_ksz=9_color.jpg" width="500" alt="Flower">
+<figure>
+    <img src="output_img/LoG_ksz=9_color_inv.jpg" width="500"
+         alt="Flower inverted">
+    <figcaption>Same as above with inverted threshold colors.</figcaption>
+</figure>
 
-Same as above with inverted threshold colors
-<img src="output_img/LoG_ksz=9_color_inv.jpg" width="500" alt="Flower_inv">
-
-Same as above with different image
-<img src="output_img/Tiger_LoG_ksz=9_color_inv.jpg" width="500" alt="Tiger">
-
-
+<figure>
+    <img src="output_img/Tiger_LoG_ksz=9_color_inv.jpg" width="500"
+         alt="Tiger">
+    <figcaption>Same as above with different image.</figcaption>
+</figure>
 
 
-
-### Known issues
+***
+## Known issues
 
 You might get a warning when running the code in PyCharm.
 
@@ -50,3 +59,4 @@ preferences (Preferences > Build, Execution, Deployment > Console > Python Conso
 -Xfrozen_modules=off
 ```
 
+***
