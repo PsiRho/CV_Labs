@@ -5,6 +5,8 @@ import matplotlib
 import numpy as np
 import cv2
 
+from RegionSegmentation import region_segment as rs
+
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from scipy.spatial.distance import cdist
@@ -123,35 +125,35 @@ def display_kmeans_clusters(img, labels, cluster_centers):
         masked_img = np.zeros_like(img, dtype=np.int32)
         masked_img += mask[..., np.newaxis] * center.astype(np.int32)
         masked_img = np.clip(masked_img, 0, 255).astype(np.uint8)
-        axes[i+1].imshow(masked_img)
-        axes[i+1].set_xticks([])
-        axes[i+1].set_yticks([])
+        axes[i + 1].imshow(masked_img)
+        axes[i + 1].set_xticks([])
+        axes[i + 1].set_yticks([])
 
         # gets the RGB values of the cluster center
         center = np.round(center).astype(np.uint8)
 
         # Set title to Cluster #, percentage of pixels, and RGB values
-        axes[i+1].set_title(
+        axes[i + 1].set_title(
             f'Pixels in cluster: ({cluster_sizes[i]:.2f}%)\n' + f'[R: {center[0]}, G: {center[1]}, B: {center[2]}]')
 
     # Hide remaining axes
-    for ax in axes[num_clusters+1:]:
+    for ax in axes[num_clusters + 1:]:
         ax.remove()
 
     plt.tight_layout()
-    #plt.savefig('../output_img/kmeans/tiger_plotkmeans_separateclusters.jpg')
+    # plt.savefig('../output_img/kmeans/tiger_plotkmeans_separateclusters.jpg')
     plt.show()
 
 
-def display_kmeans_results(original_image, result_images, k_values):
+def plot_kmeans_results2(original_image, result_images, k_values):
     num_clusters = len(k_values)
     num_images = num_clusters + 1
 
     # Calculate the number of rows and columns for the subplot arrangement
-    num_cols = int(math.sqrt(num_images-1))+1
-    num_rows = int(math.ceil(num_images/num_cols))
+    num_cols = int(math.sqrt(num_images - 1)) + 1
+    num_rows = int(math.ceil(num_images / num_cols))
 
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(5*num_cols, 5*num_rows))
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(5 * num_cols, 5 * num_rows))
 
     original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
     for i in range(num_clusters):
@@ -165,52 +167,98 @@ def display_kmeans_results(original_image, result_images, k_values):
         axes[r, c].axis('off')
 
     # Display the original image in the bottom-right subplot
-    r, c = divmod(num_images-1, num_cols)
+    r, c = divmod(num_images - 1, num_cols)
     axes[r, c].set_title("Original image")
     axes[r, c].imshow(original_image, cmap='inferno')
     axes[r, c].axis('off')
 
     # Remove any empty subplots
-    for i in range(num_images, num_rows*num_cols):
+    for i in range(num_images, num_rows * num_cols):
         r, c = divmod(i, num_cols)
         fig.delaxes(axes[r, c])
 
     plt.tight_layout()
-    #plt.savefig('../output_img/kmeans/flower_plotkmeans.jpg')
     plt.show()
 
 
+def plot_kmeans_results(original_image, result_images, k_values):
+    num_clusters = len(k_values)
+    num_images = num_clusters + 1
+
+    # Calculate the number of rows and columns for the subplot arrangement
+    num_cols = num_images
+    num_rows = 1
+
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(5 * num_cols, 5 * num_rows))
+
+    original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
+    for i in range(num_clusters):
+        result_images[i] = cv2.cvtColor(result_images[i], cv2.COLOR_BGR2RGB)
+
+    # Display the original image in the first subplot
+    axes[0].set_title("Original image")
+    axes[0].imshow(original_image, cmap='inferno')
+
+    axes[1].set_title("Clustered orig, k=4")
+    axes[1].imshow(result_images[0], cmap='inferno')
+
+    axes[2].set_title("Clustered median, k=4")
+    axes[2].imshow(result_images[1], cmap='inferno')
+
+    axes[3].set_title("Median Filtered, size=9")
+    axes[3].imshow(result_images[2], cmap='inferno')
+
+
+
+    for i in axes[:]:
+        i.axis('off')
+
+    # Remove any empty subplots
+    for i in range(num_images, num_rows * num_cols):
+        fig.delaxes(axes[i])
+
+    plt.tight_layout()
+    plt.show()
 
 
 def main():
     # read image
-    orig_img = cv2.imread('../Res/tiger.jpg', cv2.IMREAD_COLOR)
+    orig_img = cv2.imread('../Res/flower.jpg', cv2.IMREAD_COLOR)
+
+    median = rs.median_filter(orig_img, 9)
 
     # perform k-means clustering on the image
-    labels, cluster_centers = k_means_clustering(orig_img, k=7, tolerance=1e-4)
+    labels1, cluster_centers1 = k_means_clustering(median, k=4, tolerance=1e-4)
+    labels2, cluster_centers2 = k_means_clustering(orig_img, k=4, tolerance=1e-4)
 
-    clustered_img = create_result_img(labels, cluster_centers)
+    clustered_median = create_result_img(labels1, cluster_centers1)
+    clustered_orig = create_result_img(labels2, cluster_centers2)
 
-    #cv2.imwrite('../output_img/kmeans/tiger_kmeans_7_forplot.jpg', clustered_img)
+    cv2.imwrite('../output_img/flower_kmeans_4_median.jpg', clustered_median)
+    cv2.imwrite('../output_img/flower_kmeans_4_orig.jpg', clustered_orig)
+    cv2.imwrite('../output_img/flower_median_9.jpg', median)
 
-    #cv2.imshow('clustered image', clustered_img)
+    cv2.imshow('original', orig_img)
+    cv2.imshow('median', median)
+    cv2.imshow('clustered_median', clustered_median)
+    cv2.imshow('clustered_orig', clustered_orig)
 
-    #images = []
-    #labels = None
-    #cluster_centers = None
+    plot_kmeans_results(orig_img, [clustered_orig, clustered_median, median], [4, 4, 9])
+
+    # images = []
+    # labels = None
+    # cluster_centers = None
     # Will loop from 2 to 32 with a step of 2**i
-    #for i in range(1, 6):
+    # for i in range(1, 6):
     #    labels, cluster_centers = k_means_clustering(orig_img, k=2**i, tolerance=1e-4)
     #    clustered = create_result_img(labels, cluster_centers)
     #    images.append(clustered)
     #    cv2.imwrite(f'../output_img/kmeans/flower_kmeans_{2**i}.jpg', clustered)
 
-    #display_kmeans_results(orig_img, images, [2**i for i in range(1, 6)])
-
-    display_kmeans_clusters(clustered_img, labels, cluster_centers)
+    # display_kmeans_clusters(clustered_img, labels, cluster_centers)
 
     # create images with each cluster as a separate image and save them
-    #for i in range(len(cluster_centers)):
+    # for i in range(len(cluster_centers)):
     #    mask = labels == i
     #    masked_img = np.zeros_like(orig_img, dtype=np.int32)
     #    masked_img += mask[..., np.newaxis] * cluster_centers[i].astype(np.int32)

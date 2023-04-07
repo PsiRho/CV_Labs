@@ -1,5 +1,5 @@
 import numpy as np
-from Util.padding import padding
+from Util.padding import pad
 
 
 def morph_op(image, op_type: str, kernel_size: int = 3) -> np.ndarray:
@@ -14,7 +14,7 @@ def morph_op(image, op_type: str, kernel_size: int = 3) -> np.ndarray:
     kernel = np.ones((kernel_size, kernel_size), np.uint8)
 
     # padding
-    padded_img = padding(image, kernel)
+    padded_img = pad(image, kernel)
 
     # output image
     output = np.zeros_like(image)

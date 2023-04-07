@@ -1,6 +1,8 @@
 import numpy as np
 
 
+# TODO: Refactor this function to use the histogram function from Histogram\histogram.py and use vectorization
+#  instead of loops.
 def histogram_equalization(image: np.ndarray) -> np.ndarray:
     """
     Perform histogram equalization on the given image.
